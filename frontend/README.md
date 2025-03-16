@@ -1,24 +1,57 @@
-# frontend
+# 前端项目概述
 
-## Project setup
+本项目是一个基于Vue.js的前端应用，用于实现简单的网页爬取功能。用户可以通过输入目标网址，获取网页内容并下载结果。
+## 技术栈
+
+- **Vue.js**: 前端框架
+- **axios**: HTTP请求库
+- **vue-router**: 路由管理
+## 项目结构
+
 ```
+frontend/src/
+
+├── App.vue           # 主组件，渲染路由视图
+
+├── main.js           # 应用入口文件，初始化Vue实例和插件
+
+├── assets/           # 静态资源
+
+├── components/       # 通用组件
+
+├── router/           # 路由配置
+
+│   └── index.js      # 路由定义
+
+└── views/            # 页面组件
+
+    └── HomeView.vue  # 主页组件，实现网页爬取功能
+```
+
+## 功能说明
+
+1. **网页爬取**：
+	- 用户输入目标网址，点击“开始爬取”按钮后，应用通过`axios`向后端发送请求获取网页内容。
+	- 支持URL验证和处理，确保输入的网址有效。
+	- 爬取结果以文本形式展示，并提供下载功能，将结果保存为Markdown文件。
+
+2. **错误处理**：
+	- 当爬取失败或请求超时时，应用会显示错误提示信息。
+  
+3. **用户界面**：
+	- 使用`Element Plus`组件库，提供了美观且易用的交互界面。
+## 运行说明
+
+1. 确保已安装Node.js和npm。
+2. 在`frontend/`目录下运行以下命令：
+
+```bash
 npm install
-```
-
-### Compiles and hot-reloads for development
-```
 npm run serve
-```
+ ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+3. 访问`http://localhost:8080`即可使用应用。
 
-### Lints and fixes files
-```
-npm run lint
-```
+## 注意事项
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- 请确保后端服务已启动，并配置正确的API地址（默认指向`http://localhost:8000/api`）。

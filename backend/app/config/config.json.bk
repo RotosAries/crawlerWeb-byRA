@@ -1,0 +1,34 @@
+//这是配置文件的备份，使用时请删除后缀.bk并清空注释
+
+{
+    "output_format": "markdown", //输出格式，可在文档中查看支持的格式
+    "content_filter_choice": "pruning", //内容过滤器，目前仅支持pruning和BM25过滤器
+
+    "browser_config": {
+        "headless": true, //是否使用无头模式，即不打开浏览器窗口
+        "verbose": true, //是否显示浏览器日志
+        "text_mode": true //是否使用仅文本模式，排除图片、视频等媒体内容
+    },
+    "crawler_run_config": {
+        "only_text": true, //是否只抓取文本内容
+        "cache_mode": "BYPASS", //缓存模式，BYPASS表示绕过缓存，DISABLED表示禁用缓存，ENABLED表示启用缓存
+        "check_robots_txt": true, //是否检查robots.txt
+        "exclude_external_links": true, //是否排除外部链接
+        "excluded_tags": ["script", "style", "form", "header", "footer"], //排除的标签
+        "remove_overlay_elements": true, //是否移除遮罩层元素
+        "process_iframes": false, //是否处理iframe内联元素
+        "verbose": true, //是否显示日志
+        "stream": true //是否使用流式处理
+    },
+    "markdown_generator_config": {
+        "options": {
+            "ignore_links": true, //是否忽略链接
+            "ignore_images": true, //是否忽略图片
+            "escape_html": false //是否转义HTML特殊字符，比如将 <, >, &, ", ' 等，转成 &lt;, &gt;, &amp; 等实体字符
+        }
+    },
+    "pruning_content_filter_config": {
+        "threshold": 0.5, //内容过滤阈值
+        "threshold_type": "dynamic" //内容过滤阈值类型，dynamic表示动态，fixed表示固定
+    }
+}
