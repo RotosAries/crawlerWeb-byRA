@@ -23,4 +23,8 @@ nav {
     }
   }
 }
+
+body {
+  background: linear-gradient(135deg, #f8fbff 0%, #f0f7ff 100%);
+}
 </style>

@@ -4,9 +4,11 @@
     <div class="input-group">
       <el-input
         v-model="url"
-        placeholder="输入目标网址 (例: https://docs.crawl4ai.com)"
+        placeholder="输入目标网址 (例: https://example.com)"
         size="large"
         class="modern-input"
+        clearable
+        :disabled="loading"
       >
         <template #prefix>
           <el-icon class="input-prefix"><Link /></el-icon>
@@ -19,6 +21,7 @@
         :loading="loading"
         @click="crawl"
         class="action-button"
+        :disabled="loading || !url"
       >
         {{ loading ? "数据采集中..." : "启动爬取" }}
       </el-button>
@@ -47,6 +50,7 @@
 
 <script>
 import { Link, Document } from "@element-plus/icons-vue";
+// import { ElNotification } from "element-plus"; 未来可能会使用，暂时注释掉
 
 export default {
   name: "EnhancedCrawlerView",
@@ -70,6 +74,13 @@ export default {
     async crawl() {
       if (!this.validateUrl()) {
         this.$message.warning("请输入有效的网页地址");
+
+        // 弹窗形式提示，未来可能会使用，暂时注释掉
+        // ElNotification.warning({
+        //   title: "警告",
+        //   message: "请输入有效的网页地址",
+        //   position: "top-right",
+        // });
         return;
       }
 
@@ -134,7 +145,15 @@ export default {
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   border: none;
 
-  &:hover {
+  &:disabled {
+    background: linear-gradient(135deg, #9a9cf7 0%, #7f79ee 100%);
+  }
+
+  &:disabled:hover {
+    background: linear-gradient(135deg, #9a9cf7 0%, #7f79ee 100%);
+  }
+
+  &:not(:disabled):hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   }
@@ -188,6 +207,7 @@ export default {
   color: #334155;
   white-space: pre-wrap;
   counter-reset: line;
+  text-align: left;
 
   &::before {
     content: attr(data-content);
