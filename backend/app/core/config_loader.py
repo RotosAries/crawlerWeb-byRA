@@ -50,21 +50,26 @@ class ConfigLoader:
 
     def load_browser_config(self) -> BrowserConfig:
         if "browser_config" not in self._config_cache:
-            config_data = self._load_config_section("browser_config")
-            self._config_cache["browser_config"] = BrowserConfig(**config_data)
+            config_data = {}
+            if not self._is_config_section_empty("browser_config"):
+                config_data = self._load_config_section("browser_config")
+                
+            self._config_cache["browser_config"] = BrowserConfig(**config_data) if config_data else BrowserConfig()
         return self._config_cache["browser_config"]
 
     def load_crawler_config(self) -> CrawlerRunConfig:
         if "crawler_run_config" not in self._config_cache:
-            config_data = self._load_config_section("crawler_run_config")
+            config_data = {}
+            if not self._is_config_section_empty("crawler_run_config"):
+                config_data = self._load_config_section("crawler_run_config")
             
-            if "cache_mode" in config_data:
-                config_data["cache_mode"] = CacheMode[config_data["cache_mode"]]
+                if "cache_mode" in config_data:
+                    config_data["cache_mode"] = CacheMode[config_data["cache_mode"]]
 
-            if not self._is_config_section_empty("markdown_generator_config"):
-                config_data["markdown_generator"] = self.load_md_generator_config()
+                if not self._is_config_section_empty("markdown_generator_config"):
+                    config_data["markdown_generator"] = self.load_md_generator_config()
 
-            self._config_cache["crawler_run_config"] = CrawlerRunConfig(**config_data)
+            self._config_cache["crawler_run_config"] = CrawlerRunConfig(**config_data) if config_data else CrawlerRunConfig()
         return self._config_cache["crawler_run_config"]
 
     def load_md_generator_config(self) -> DefaultMarkdownGenerator:
@@ -89,7 +94,8 @@ class ConfigLoader:
                 full_config = json.load(f)
                 return full_config.get(section, {})
         except json.JSONDecodeError as e:
-            raise ValueError(f"配置文件格式错误: {e}") from e
+            print(f"警告: “{section}”配置文件格式错误: {e}")
+            return {}
     
     def _is_config_section_empty(self, section: str) -> bool:
         config_data = self._load_config_section(section)
