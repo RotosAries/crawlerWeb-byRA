@@ -10,12 +10,14 @@ async def main():
 
     # 爬虫主逻辑
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        result = await crawler.arun(url="https://docs.crawl4ai.com/core/installation/", config=run_config)
+        result = await crawler.arun(url="https://docs.crawl4ai.com/core/browser-crawler-config/", config=run_config)
 
     # 检查爬取是否成功并输出结果
     if result.success:
         print("爬取成功！")
-        print("原始Markdown内容：\n", result.markdown)
+        print("原始Markdown内容：\n", result.markdown.raw_markdown)
+        print("-------------------------------------------------------------")
+        print("过滤后的Markdown内容：\n",result.markdown.fit_markdown)
     else:
         print(f"爬取失败：{result.error_message}")
 

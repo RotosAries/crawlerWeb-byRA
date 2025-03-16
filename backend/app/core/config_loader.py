@@ -3,6 +3,7 @@ from enum import Enum
 from pathlib import Path
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig, CacheMode
 from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
+from crawl4ai.content_filter_strategy import PruningContentFilter
 
 class ConfigLoader:
     def __init__(self, config_path="../config/config.json"):
@@ -32,7 +33,15 @@ class ConfigLoader:
 
     def load_md_generator_config(self) -> DefaultMarkdownGenerator:
         config_data = self._load_config_section("markdown_generator_config")
+
+        if not self._is_config_section_empty("puning_content_filter_config"):
+            config_data["content_filter"] = self.load_content_filter_config()
+
         return DefaultMarkdownGenerator(**config_data)
+
+    def load_content_filter_config(self) -> PruningContentFilter:
+        config_data = self._load_config_section("puning_content_filter_config")
+        return PruningContentFilter(**config_data)
 
     def _load_config_section(self, section: str):
         try:

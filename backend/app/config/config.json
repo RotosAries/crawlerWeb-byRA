@@ -21,5 +21,9 @@
             "ignore_images": true,
             "escape_html": false
         }
+    },
+    "puning_content_filter_config": {
+        "threshold": 0.85,
+        "threshold_type": "dynamic"
     }
 }
