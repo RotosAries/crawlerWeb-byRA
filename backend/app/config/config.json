@@ -1,0 +1,18 @@
+{
+    "browser_config": {
+        "headless": true,
+        "verbose": true,
+        "text_mode": true
+    },
+    "crawler_run_config": {
+        "only_text": true,
+        "cache_mode": "ENABLE",
+        "check_robots_txt": true,
+        "exclude_external_links": true,
+        "excluded_tags": ["script", "style", "form", "header", "footer"],
+        "remove_overlay_elements": true,
+        "process_iframes": false,
+        "verbose": true,
+        "stream": true
+    }
+}
