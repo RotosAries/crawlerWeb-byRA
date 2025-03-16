@@ -1,5 +1,6 @@
 {
-    "output_format": "fit_markdown",
+    "output_format": "markdown",
+    "content_filter_choice": "pruning",
 
     "browser_config": {
         "headless": true,
@@ -24,7 +25,7 @@
             "escape_html": false
         }
     },
-    "puning_content_filter_config": {
+    "pruning_content_filter_config": {
         "threshold": 0.5,
         "threshold_type": "dynamic"
     }
