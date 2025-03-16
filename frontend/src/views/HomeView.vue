@@ -1,6 +1,5 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
     <div>
       <input v-model="url" placeholder="请输入URL" />
       <button @click="crawl">开始爬取</button>
@@ -13,8 +12,6 @@
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
   name: "HomeView",
   data() {
@@ -26,7 +23,7 @@ export default {
   methods: {
     async crawl() {
       try {
-        const response = await axios.get("http://localhost:8000/api/crawl", {
+        const response = await this.$axios.get("/crawl", {
           params: {
             url: this.url,
           },
