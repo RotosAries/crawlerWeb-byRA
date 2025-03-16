@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from pathlib import Path
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig, CacheMode
 from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
