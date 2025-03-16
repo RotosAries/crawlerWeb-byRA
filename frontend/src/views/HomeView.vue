@@ -49,7 +49,6 @@
               size="small"
               @click="downloadContent"
               class="download-button"
-              v-if="effectiveCharCount > 0"
             >
               <el-icon class="download-icon"><Download /></el-icon>
               下载结果
@@ -80,6 +79,7 @@ export default {
       content: "",
       errorMessage: "",
       loading: false,
+      valid: true,
     };
   },
   components: {
@@ -107,6 +107,7 @@ export default {
       }
 
       try {
+        this.valid = true;
         this.loading = true;
         this.content = "";
         this.errorMessage = "";
@@ -119,6 +120,12 @@ export default {
 
         if (response.data.success) {
           this.content = response.data.content;
+          if (this.effectiveCharCount === 0 || !this.content) {
+            this.valid = false;
+            this.content =
+              "🤔 未采集到有效内容，可能是以下原因：\n1. pruning内容过滤器阈值过高，导致无有效内容\n2. 在未使用内容过滤器的情况下（可在控制台查看使用情况），却指定了 fit markdown 输出格式，导致返回的 fit markdown 内容为空";
+          }
+
           this.$message.success("🎉 数据采集成功");
         } else {
           this.errorMessage = `服务器错误：${response.data.error_message}`;
@@ -180,6 +187,10 @@ export default {
       return dotIndex > -1 && dotIndex < lastSegment.length - 1;
     },
     downloadContent() {
+      if (!this.valid) {
+        this.$message.warning("没有可下载的内容");
+        return;
+      }
       const blob = new Blob([this.content], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");

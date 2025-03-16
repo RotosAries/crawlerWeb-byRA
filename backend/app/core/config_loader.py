@@ -243,6 +243,7 @@ class ConfigLoader:
                                 print("Markdown生成器配置加载成功，但未正确配置pruning内容过滤器")
                             else:
                                 config_data["content_filter"] = self.load_pruning_content_filter_config()
+                                print(f"Markdown生成器配置加载成功，已正确配置pruning内容过滤器")
                         else:
                             if not self._is_config_section_exist("BM25_content_filter_config"):
                                 print("警告: “BM25_content_filter_config”配置项不存在, 将不使用内容过滤器")
@@ -252,7 +253,7 @@ class ConfigLoader:
                                 print("Markdown生成器配置加载成功，但未正确配置BM25内容过滤器")
                             else:
                                 config_data["content_filter"] = self.load_BM25_content_filter_config()
-                        print(f"Markdown生成器配置加载成功，已正确配置{self._load_config_section('content_filter_choice')}内容过滤器")
+                                print(f"Markdown生成器配置加载成功，已正确配置BM25内容过滤器")
 
             self._config_cache["markdown_generator_config"] = DefaultMarkdownGenerator(**config_data)
         return self._config_cache["markdown_generator_config"]
