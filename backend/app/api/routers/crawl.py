@@ -7,11 +7,11 @@ from ...models.schemas import CrawlResponse, CrawlRequest
 
 router = APIRouter()
 
-@router.post("/crawl", response_model=CrawlResponse)
+@router.get("/crawl", response_model=CrawlResponse)
 async def crawl(
-    url: str,
-    browser_config: BrowserConfig = Depends(get_browser_config),
-    crawler_run_config: CrawlerRunConfig = Depends(get_crawler_config)
+    url: str, # 仅支持以查询参数的形式传入url
+    browser_config: BrowserConfig = Depends(get_browser_config), # 后端加载浏览器配置，前端无需传入
+    crawler_run_config: CrawlerRunConfig = Depends(get_crawler_config) # 后端加载爬虫运行配置，前端无需传入
     ):
 
     # 创建爬虫请求对象
