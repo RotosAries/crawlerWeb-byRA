@@ -6,7 +6,7 @@
     },
     "crawler_run_config": {
         "only_text": true,
-        "cache_mode": "ENABLE",
+        "cache_mode": "CacheMode.ENABLED",
         "check_robots_txt": true,
         "exclude_external_links": true,
         "excluded_tags": ["script", "style", "form", "header", "footer"],
