@@ -1,6 +1,5 @@
 <template>
   <div class="enhanced-container">
-    <!-- 输入区域增强 -->
     <div class="input-group">
       <el-input
         v-model="url"
@@ -9,6 +8,7 @@
         class="modern-input"
         clearable
         :disabled="loading"
+        @keyup.enter="crawl"
       >
         <template #prefix>
           <el-icon class="input-prefix"><Link /></el-icon>
@@ -27,15 +27,35 @@
       </el-button>
     </div>
 
-    <!-- 结果展示优化 -->
+    <transition name="el-zoom-in-top">
+      <el-alert
+        v-if="errorMessage"
+        :title="errorMessage"
+        type="error"
+        show-icon
+        class="error-panel"
+        @close="errorMessage = ''"
+      />
+    </transition>
+
     <transition name="el-zoom-in-top">
       <el-card v-if="content" class="result-panel">
         <template #header>
           <div class="panel-header">
             <el-icon class="header-badge"><Document /></el-icon>
             <span class="panel-title">数据抓取结果</span>
+            <el-button
+              type="success"
+              size="small"
+              @click="downloadContent"
+              class="download-button"
+              v-if="effectiveCharCount > 0"
+            >
+              <el-icon class="download-icon"><Download /></el-icon>
+              下载结果
+            </el-button>
             <el-tag type="info" size="small" effect="dark" class="status-tag">
-              {{ contentLines }} 行内容
+              {{ effectiveCharCount }} 个字符
             </el-tag>
           </div>
         </template>
@@ -49,7 +69,7 @@
 </template>
 
 <script>
-import { Link, Document } from "@element-plus/icons-vue";
+import { Link, Document, Download } from "@element-plus/icons-vue";
 // import { ElNotification } from "element-plus"; 未来可能会使用，暂时注释掉
 
 export default {
@@ -58,16 +78,18 @@ export default {
     return {
       url: "",
       content: "",
+      errorMessage: "",
       loading: false,
     };
   },
   components: {
     Link,
     Document,
+    Download,
   },
   computed: {
-    contentLines() {
-      return this.content ? this.content.split("\n").length : 0;
+    effectiveCharCount() {
+      return this.content ? this.content.replace(/\s/g, "").length : 0;
     },
   },
   methods: {
@@ -86,30 +108,99 @@ export default {
 
       try {
         this.loading = true;
+        this.content = "";
+        this.errorMessage = "";
+        this.url = this.processUrl();
+
         const response = await this.$axios.get("/crawl", {
           params: { url: this.url },
-          timeout: 20000,
+          timeout: 15000,
         });
 
-        this.content = response.data.success
-          ? response.data.content
-          : `服务器错误: ${response.data.error_message}`;
+        if (response.data.success) {
+          this.content = response.data.content;
+          this.$message.success("🎉 数据采集成功");
+        } else {
+          this.errorMessage = `服务器错误：${response.data.error_message}`;
+          this.$message.error("❌ 数据采集失败");
+        }
       } catch (error) {
-        this.content = `请求失败: ${error.code || "网络异常"}`;
+        if (
+          error.code === "ECONNABORTED" &&
+          error.message.includes("timeout")
+        ) {
+          this.errorMessage = `请求超时：${error.code} : ${error.message}`;
+          this.$message.error("⏳ 请求超时，请稍后重试");
+        } else {
+          this.errorMessage = `请求失败: ${error.code} : ${
+            error.message || "未知错误"
+          }`;
+          this.$message.error("⚠️ 请求失败");
+        }
       } finally {
         this.loading = false;
       }
     },
     validateUrl() {
       const pattern =
-        /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+        /^(https?:\/\/)?((([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)|localhost)(:(0|[1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5]))?([\w\-.,@?^=%&:/~+#]*[\w@?^=%&:/~+#])?$/i;
       return pattern.test(this.url);
+    },
+    processUrl() {
+      let processedUrl = this.url.split("#")[0];
+      if (!/^https?:\/\//i.test(processedUrl)) {
+        processedUrl = "https://" + processedUrl;
+      }
+
+      let urlObj;
+      try {
+        urlObj = new URL(processedUrl);
+      } catch (e) {
+        return processedUrl;
+      }
+
+      urlObj.pathname = urlObj.pathname
+        .replace(/\/+/g, "/")
+        .replace(/^\/?/, "/");
+
+      if (!this.isFilePath(urlObj.pathname)) {
+        if (!urlObj.pathname.endsWith("/")) {
+          urlObj.pathname += "/";
+        }
+      }
+
+      return urlObj.toString();
+    },
+    isFilePath(pathname) {
+      if (pathname === "/") return false;
+      const segments = pathname.split("/");
+      const lastSegment = segments[segments.length - 1];
+      if (lastSegment === "") return false;
+      const dotIndex = lastSegment.lastIndexOf(".");
+      return dotIndex > -1 && dotIndex < lastSegment.length - 1;
+    },
+    downloadContent() {
+      const blob = new Blob([this.content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      const domain = new URL(this.url).hostname.replace(/\./g, "-");
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/[-:T]/g, "");
+      link.download = `crawler-${domain}-${timestamp}.md`;
+
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+// 输入区样式
 .enhanced-container {
   max-width: 1440px;
   margin: 2rem auto;
@@ -141,16 +232,15 @@ export default {
 
 .action-button {
   width: 160px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:disabled {
     background: linear-gradient(135deg, #9a9cf7 0%, #7f79ee 100%);
-  }
-
-  &:disabled:hover {
-    background: linear-gradient(135deg, #9a9cf7 0%, #7f79ee 100%);
+    &:hover {
+      background: linear-gradient(135deg, #9a9cf7 0%, #7f79ee 100%);
+    }
   }
 
   &:not(:disabled):hover {
@@ -159,6 +249,7 @@ export default {
   }
 }
 
+// 结果展示区样式
 .result-panel {
   margin-top: 2rem;
   border: 1px solid #e0e7ff;
@@ -174,30 +265,98 @@ export default {
 .panel-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
+  flex-wrap: wrap;
 
   .header-badge {
     color: #6366f1;
     font-size: 1.4em;
+    flex-shrink: 0;
   }
 
   .panel-title {
     font-weight: 600;
     color: #1e293b;
     letter-spacing: -0.5px;
+    flex-shrink: 0;
   }
 
-  .status-tag {
+  // 下载按钮样式
+  :deep(.download-button) {
     margin-left: auto;
+    background: linear-gradient(135deg, #9a9cf7 0%, #7f79ee 100%);
+    border: none;
+    color: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      background: linear-gradient(135deg, #9a9cf7 0%, #7f79ee 100%);
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transition: 0.5s;
+    }
+
+    &:hover::before {
+      left: 100%;
+    }
+
+    .download-icon {
+      margin-right: 6px;
+      font-size: 1.1em;
+      vertical-align: -0.15em;
+      transition: transform 0.2s ease;
+    }
+
+    &:active .download-icon {
+      transform: translateY(1px);
+    }
+  }
+
+  // 字符统计样式
+  .status-tag {
+    margin-right: 0.5rem;
+    border-color: #6366f1;
+    color: #6366f1;
+    background: transparent !important;
+    flex-shrink: 0;
   }
 }
 
+// 内容显示区
 .content-viewer {
   background: #f8faff;
   border-radius: 8px;
   max-height: 70vh;
   overflow: auto;
   padding: 1.5rem;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    background: rgba(99, 102, 241, 0.05);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 4px;
+  }
 }
 
 .data-output {
@@ -206,14 +365,10 @@ export default {
   line-height: 1.7;
   color: #334155;
   white-space: pre-wrap;
-  counter-reset: line;
   text-align: left;
-
-  &::before {
-    content: attr(data-content);
-  }
 }
 
+// 响应式调整（移动端适配）
 @media (max-width: 768px) {
   .input-group {
     grid-template-columns: 1fr;
@@ -227,5 +382,25 @@ export default {
   .content-viewer {
     max-height: 60vh;
   }
+
+  .panel-header {
+    row-gap: 0.8rem;
+
+    :deep(.download-button) {
+      order: 1;
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .status-tag {
+      margin-left: auto;
+    }
+  }
+}
+
+// 错误提示样式
+.error-panel {
+  margin-top: 1.5rem;
+  border-radius: 8px;
 }
 </style>
