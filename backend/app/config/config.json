@@ -1,4 +1,6 @@
 {
+    "output_format": "fit_markdown",
+
     "browser_config": {
         "headless": true,
         "verbose": true,
@@ -23,7 +25,7 @@
         }
     },
     "puning_content_filter_config": {
-        "threshold": 0.85,
+        "threshold": 0.5,
         "threshold_type": "dynamic"
     }
 }

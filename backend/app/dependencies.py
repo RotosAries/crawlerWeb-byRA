@@ -8,3 +8,7 @@ def get_browser_config() -> BrowserConfig:
 def get_crawler_config() -> CrawlerRunConfig:
     config_loader = ConfigLoader()
     return config_loader.load_crawler_config()
+
+def get_output_format() -> str:
+    config_loader = ConfigLoader()
+    return config_loader.load_output_format()

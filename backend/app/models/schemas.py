@@ -7,6 +7,7 @@ class CrawlRequest(BaseModel):
     url: str
     browser_config: BrowserConfig
     crawler_run_config: CrawlerRunConfig
+    output_format: str
 
 class CrawlResponse(BaseModel):
     success: bool
