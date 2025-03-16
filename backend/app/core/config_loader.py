@@ -1,7 +1,8 @@
 import json
 from enum import Enum
 from pathlib import Path
-from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
+from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig, CacheMode
+from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
 
 class ConfigLoader:
     def __init__(self, config_path="../config/config.json"):
@@ -20,7 +21,18 @@ class ConfigLoader:
 
     def load_crawler_config(self) -> CrawlerRunConfig:
         config_data = self._load_config_section("crawler_run_config")
+        
+        if "cache_mode" in config_data:
+            config_data["cache_mode"] = CacheMode[config_data["cache_mode"]]
+
+        if not self._is_config_section_empty("markdown_generator_config"):
+            config_data["markdown_generator"] = self.load_md_generator_config()
+
         return CrawlerRunConfig(**config_data)
+
+    def load_md_generator_config(self) -> DefaultMarkdownGenerator:
+        config_data = self._load_config_section("markdown_generator_config")
+        return DefaultMarkdownGenerator(**config_data)
 
     def _load_config_section(self, section: str):
         try:
@@ -29,3 +41,7 @@ class ConfigLoader:
                 return full_config.get(section, {})
         except json.JSONDecodeError as e:
             raise ValueError(f"配置文件格式错误: {e}") from e
+    
+    def _is_config_section_empty(self, section: str) -> bool:
+        config_data = self._load_config_section(section)
+        return not config_data

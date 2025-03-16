@@ -10,7 +10,7 @@ async def main():
 
     # 爬虫主逻辑
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        result = await crawler.arun(url="https://example.com", config=run_config)
+        result = await crawler.arun(url="https://docs.crawl4ai.com/core/installation/", config=run_config)
 
     # 检查爬取是否成功并输出结果
     if result.success:

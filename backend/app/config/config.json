@@ -6,7 +6,7 @@
     },
     "crawler_run_config": {
         "only_text": true,
-        "cache_mode": "CacheMode.ENABLED",
+        "cache_mode": "BYPASS",
         "check_robots_txt": true,
         "exclude_external_links": true,
         "excluded_tags": ["script", "style", "form", "header", "footer"],
@@ -14,5 +14,12 @@
         "process_iframes": false,
         "verbose": true,
         "stream": true
+    },
+    "markdown_generator_config": {
+        "options": {
+            "ignore_links": true,
+            "ignore_images": true,
+            "escape_html": false
+        }
     }
 }
