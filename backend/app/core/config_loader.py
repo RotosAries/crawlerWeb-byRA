@@ -5,8 +5,9 @@ from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
 from crawl4ai.content_filter_strategy import PruningContentFilter
 
 class ConfigLoader:
-    def __init__(self, config_path="../config/config.json"):
-        self.config_path = Path(config_path)
+    def __init__(self, config_path="./config/config.json"):
+        current_file_path = Path(__file__)
+        self.config_path = current_file_path.parent.parent.joinpath(config_path)
         self._validate_config_path()
 
     def _validate_config_path(self):

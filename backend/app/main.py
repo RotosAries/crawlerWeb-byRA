@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from .api.routers import crawler
+from .api.routers import crawl
 
 app = FastAPI()
 
@@ -19,7 +19,7 @@ async def root():
     return {"message": "Hello, this is the crawler API!"}
 
 # 定义爬虫路由
-app.include_router(crawler.router, prefix="/api")
+app.include_router(crawl.router, prefix="/api")
 
 
 # 启动应用

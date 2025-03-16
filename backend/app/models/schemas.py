@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional, Dict
+from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
 
 class CrawlRequest(BaseModel):
+    model_config = {"arbitrary_types_allowed": True}
     url: str
-    browser_config: Dict
-    crawler_run_config: Dict
+    browser_config: BrowserConfig
+    crawler_run_config: CrawlerRunConfig
 
 class CrawlResponse(BaseModel):
     success: bool
